@@ -4,7 +4,7 @@ import "encoding/json"
 
 type writer interface {
 	WriteHeader(code int)
-	Write(bytes []byte)
+	Write(bytes []byte) (int, error)
 }
 
 func write(w writer, code int, content interface{}) {

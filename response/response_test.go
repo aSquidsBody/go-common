@@ -21,8 +21,9 @@ func newMockWriter() *mockWriter {
 	}
 }
 
-func (m *mockWriter) Write(bytes []byte) {
+func (m *mockWriter) Write(bytes []byte) (int, error) {
 	m.bytes = bytes
+	return 0, nil
 }
 
 func (m *mockWriter) WriteHeader(code int) {
