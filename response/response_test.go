@@ -34,9 +34,20 @@ func TestWrite(t *testing.T) {
 	mock := newMockWriter()
 	code := 100
 	content := map[string]string{"test": "value"}
-	bytes, _ := json.Marshal(content)
+	bytes, _ := json.Marshal([]map[string]string{content, content})
 
-	write(mock, code, content)
+	write(mock, code, content, content)
+
+	assert.Equal(t, code, mock.code)
+	assert.Equal(t, bytes, mock.bytes)
+}
+
+func TestWriteEmpty(t *testing.T) {
+	mock := newMockWriter()
+	code := 100
+	bytes := *new([]byte)
+
+	write(mock, code)
 
 	assert.Equal(t, code, mock.code)
 	assert.Equal(t, bytes, mock.bytes)
