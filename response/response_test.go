@@ -34,10 +34,20 @@ func TestWrite(t *testing.T) {
 	mock := newMockWriter()
 	code := 100
 	content := map[string]string{"test": "value"}
+	bytes, _ := json.Marshal(content)
+
+	write(mock, code, content)
+	assert.Equal(t, code, mock.code)
+	assert.Equal(t, bytes, mock.bytes)
+}
+
+func TestWriteArray(t *testing.T) {
+	mock := newMockWriter()
+	code := 100
+	content := map[string]string{"test": "value"}
 	bytes, _ := json.Marshal([]map[string]string{content, content})
 
 	write(mock, code, content, content)
-
 	assert.Equal(t, code, mock.code)
 	assert.Equal(t, bytes, mock.bytes)
 }
@@ -45,12 +55,10 @@ func TestWrite(t *testing.T) {
 func TestWriteEmpty(t *testing.T) {
 	mock := newMockWriter()
 	code := 100
-	bytes := *new([]byte)
 
 	write(mock, code)
-
 	assert.Equal(t, code, mock.code)
-	assert.Equal(t, bytes, mock.bytes)
+	assert.Equal(t, "", string(mock.bytes))
 }
 
 func TestWriteWithMarshalError(t *testing.T) {
@@ -77,9 +85,8 @@ func TestWriteError(t *testing.T) {
 
 	var res errorResponse
 	json.Unmarshal(mock.bytes, &res)
-
-	assert.Equal(t, mock.code, code)
-	assert.Equal(t, res.Code, code)
+	assert.Equal(t, code, mock.code)
+	assert.Equal(t, code, res.Code)
 	assert.Equal(t, message, res.Message)
 	assert.Equal(t, len(res.Errors), 2)
 	assert.Equal(t, err1.Error(), res.Errors[0])
