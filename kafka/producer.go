@@ -19,7 +19,7 @@ type syncProducer struct {
 
 func (p *syncProducer) Send(msg *message) error {
 	partition, offset, err := (*p.producer).SendMessage(&sarama.ProducerMessage{
-		Topic: p.Config.topic,
+		Topic: p.Config.producerTopic,
 		Value: msg,
 	})
 
@@ -27,7 +27,7 @@ func (p *syncProducer) Send(msg *message) error {
 		return fmt.Errorf("Failed to send Kafka message: %w", err)
 	}
 
-	fmt.Printf("Topic %s: Message published on partition=%d, offset=%d\n", p.Config.topic, partition, offset)
+	fmt.Printf("Topic %s: Message published on partition=%d, offset=%d\n", p.Config.producerTopic, partition, offset)
 	return nil
 }
 
@@ -53,7 +53,7 @@ type asyncProducer struct {
 
 func (ap *asyncProducer) Send(msg *message) {
 	(*ap.producer).Input() <- &sarama.ProducerMessage{
-		Topic: ap.Config.topic,
+		Topic: ap.Config.producerTopic,
 		Value: msg,
 	}
 }
@@ -108,7 +108,7 @@ func (al *accessLogger) HandlerFunc(next http.Handler) http.Handler {
 		}
 
 		(*al.producer).Input() <- &sarama.ProducerMessage{
-			Topic: al.Config.topic,
+			Topic: al.Config.producerTopic,
 			Key:   sarama.StringEncoder(r.RemoteAddr),
 			Value: NewMessage(entry),
 		}
