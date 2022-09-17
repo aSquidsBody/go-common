@@ -29,13 +29,13 @@ func (c *config) ForAccessLog(topic string) *config {
 	return c
 }
 
-func (c *config) ForConsumer(topics []string, group string) *config {
+func (c *config) ForConsumer(kafkaVersion string, topics []string) *config {
 	c.consumerTopics = topics
 
 	// if verbose
 	// sarama.Logger = log.New(os.Stdout, "[sarama]", log.Lstdflags)
 
-	version, err := sarama.ParseKafkaVersion("2.1.1")
+	version, err := sarama.ParseKafkaVersion(kafkaVersion)
 	if err != nil {
 		log.Panicf("Error parsing kafka version: %v", err)
 	}
