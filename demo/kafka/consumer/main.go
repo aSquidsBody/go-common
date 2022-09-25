@@ -27,7 +27,7 @@ func main() {
 		log.Fatal("could not create consumer ", err)
 	}
 
-	consumer.SetHandler(func(msg kafka.Message) {
+	consumer.SetHandler(func(msg kafka.ConsumerMessage) {
 		var value string
 		err := msg.Unmarshal(&value)
 		if err != nil {
