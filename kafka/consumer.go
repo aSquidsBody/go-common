@@ -9,7 +9,7 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-type handler func(Message)
+type handler func(ConsumerMessage)
 
 type Consumer interface {
 	SetHandler(handler)
@@ -99,7 +99,7 @@ func (c *consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 	for {
 		select {
 		case m := <-claim.Messages():
-			message := Message{m}
+			message := ConsumerMessage{m}
 			c.handler(message)
 			session.MarkMessage(m, fmt.Sprintf("Consumed topic = %s, partition = %d, timestamp = %s", message.Topic, message.Partition, message.Timestamp))
 

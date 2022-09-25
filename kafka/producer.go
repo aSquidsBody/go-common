@@ -9,7 +9,7 @@ import (
 )
 
 type SyncProducer interface {
-	Send(msg *message) error
+	Send(msg *ProducerMessage) error
 }
 
 type syncProducer struct {
@@ -17,7 +17,7 @@ type syncProducer struct {
 	producer *sarama.SyncProducer
 }
 
-func (p *syncProducer) Send(msg *message) error {
+func (p *syncProducer) Send(msg *ProducerMessage) error {
 	partition, offset, err := (*p.producer).SendMessage(&sarama.ProducerMessage{
 		Topic: p.Config.producerTopic,
 		Value: msg,
@@ -42,7 +42,7 @@ func NewSyncProducer(brokers []string, config *config) (SyncProducer, error) {
 }
 
 type AsyncProducer interface {
-	Send(msg *message)
+	Send(msg *ProducerMessage)
 }
 
 type asyncProducer struct {
@@ -51,7 +51,7 @@ type asyncProducer struct {
 	errorCallback func(err error)
 }
 
-func (ap *asyncProducer) Send(msg *message) {
+func (ap *asyncProducer) Send(msg *ProducerMessage) {
 	(*ap.producer).Input() <- &sarama.ProducerMessage{
 		Topic: ap.Config.producerTopic,
 		Value: msg,
