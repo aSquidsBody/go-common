@@ -5,7 +5,7 @@ import (
 )
 
 // errorResponse is the standard struct for API error responses
-type errorResponse struct {
+type ErrorResponse struct {
 	Code    int      `json:"code,omitempty"`
 	Message string   `json:"message,omitempty"`
 	Errors  []string `json:"errors,omitempty"`
@@ -18,7 +18,7 @@ func writeError(w writer, code int, message string, errs ...error) {
 		errStr[i] = errs[i].Error()
 	}
 
-	body := errorResponse{
+	body := ErrorResponse{
 		Code:    code,
 		Message: message,
 		Errors:  errStr,
@@ -29,7 +29,7 @@ func writeError(w writer, code int, message string, errs ...error) {
 
 // Write json marshal failure in response attempt
 func writeMarshalError(w writer, err error) {
-	body := errorResponse{
+	body := ErrorResponse{
 		Code:    500,
 		Message: "Internal Server Error",
 		Errors:  []string{err.Error()},

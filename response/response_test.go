@@ -67,7 +67,7 @@ func TestWriteWithMarshalError(t *testing.T) {
 	content := make(chan int)
 	write(mock, code, content)
 
-	var res errorResponse
+	var res ErrorResponse
 	json.Unmarshal(mock.bytes, &res)
 
 	assert.Equal(t, 500, mock.code)
@@ -83,7 +83,7 @@ func TestWriteError(t *testing.T) {
 	err2 := fmt.Errorf("error 2")
 	writeError(mock, code, message, err1, err2)
 
-	var res errorResponse
+	var res ErrorResponse
 	json.Unmarshal(mock.bytes, &res)
 	assert.Equal(t, code, mock.code)
 	assert.Equal(t, code, res.Code)

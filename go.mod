@@ -4,11 +4,14 @@ go 1.19
 
 require (
 	github.com/Shopify/sarama v1.36.0
+	github.com/go-redis/redis/v9 v9.0.0-beta.2
 	github.com/stretchr/testify v1.8.0
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/eapache/go-resiliency v1.3.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
