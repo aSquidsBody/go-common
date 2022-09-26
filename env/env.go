@@ -5,12 +5,11 @@ import (
 	"os"
 )
 
-func GetEnv(name, fallback string) (result string) {
-	defer fmt.Printf("%s=%s\n", name, result)
+func GetEnv(name, fallback string) string {
 	if val, exists := os.LookupEnv(name); exists {
-		result = val
-		return
+		fmt.Printf("%s = %s\n", name, val)
+		return val
 	}
-	result = fallback
-	return
+	fmt.Printf("%s = %s\n", name, fallback)
+	return fallback
 }
