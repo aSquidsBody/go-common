@@ -6,18 +6,24 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-// message used in the producer
+const (
+	CREATED = "created"
+	UPDATED = "updated"
+	DELETED = "deleted"
+)
+
 type ProducerMessage struct {
 	content interface{}
 
 	encoded []byte
 	err     error
 }
-
-// Message is used in the consumer, exported so users can
-// make use of it
 type ConsumerMessage struct {
 	*sarama.ConsumerMessage
+}
+
+type EventMessage struct {
+	EventType string `json:"event_type"`
 }
 
 func (m *ConsumerMessage) Unmarshal(v interface{}) error {
