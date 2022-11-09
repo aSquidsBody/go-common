@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/aSquidsBody/go-common/response"
 )
 
 type ApiClient interface {
@@ -32,7 +30,7 @@ func (ac *apiClient) Get(route string, v interface{}) error {
 		return err
 	}
 	if res.StatusCode >= 400 {
-		var resp response.ErrorResponse
+		var resp ErrorResponse
 		err = json.NewDecoder(res.Body).Decode(&resp)
 		if err != nil {
 			fmt.Printf("GET %s returned with error code %d. Could not parse response body.\n", url, res.StatusCode)

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	api "github.com/aSquidsBody/go-common/api"
 	"github.com/aSquidsBody/go-common/kafka"
-	res "github.com/aSquidsBody/go-common/response"
 )
 
 var producer kafka.SyncProducer
@@ -18,7 +18,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error occurred: ", err)
 		return
 	}
-	res.WriteOk(w, "response")
+	api.WriteOk(w, "response")
 }
 
 func main() {

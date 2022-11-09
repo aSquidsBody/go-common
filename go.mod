@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/Shopify/sarama v1.36.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.2
+	github.com/gorilla/mux v1.8.0
 	github.com/stretchr/testify v1.8.0
 	gorm.io/driver/postgres v1.3.10
 	gorm.io/gorm v1.23.10

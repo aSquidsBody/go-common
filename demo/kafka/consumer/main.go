@@ -5,15 +5,15 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/aSquidsBody/go-common/api"
 	"github.com/aSquidsBody/go-common/kafka"
-	res "github.com/aSquidsBody/go-common/response"
 )
 
 var consumer kafka.Consumer
 var messages []string
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	res.WriteOk(w, messages)
+	api.WriteOk(w, messages)
 }
 
 func main() {
