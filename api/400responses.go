@@ -1,4 +1,4 @@
-package response
+package api
 
 // WriteNotFoundError writes a 404 response. No other information
 // is passed to the client.

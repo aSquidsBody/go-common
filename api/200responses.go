@@ -1,4 +1,4 @@
-package response
+package api
 
 func WriteOk(w writer, content ...interface{}) {
 	if len(content) == 1 {
