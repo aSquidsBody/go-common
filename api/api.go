@@ -100,16 +100,20 @@ func (ic *internalClient) Get(route string, v interface{}) error {
 		return err
 	}
 
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		logs.Error(fmt.Sprintf("Could not read body of GET request for %s", ic.service), err)
-		return err
+	if res.StatusCode >= 400 {
+		var resp ErrorResponse
+		err = json.NewDecoder(res.Body).Decode(&resp)
+		if err != nil {
+			logs.Error(fmt.Sprintf("GET request to %s failed with a %d response. Could not decode response body", ic.service, res.StatusCode), err)
+			return err
+		}
+		logs.Error(fmt.Sprintf("GET request to %s failed with a %d response. Reason = %+v", ic.service, res.StatusCode, resp), fmt.Errorf("No error"))
+		return fmt.Errorf("Failed GET request. Response code %d. Response %+v", res.StatusCode, resp)
 	}
 
-	err = json.Unmarshal(body, v)
+	err = json.NewDecoder(res.Body).Decode(v)
 	if err != nil {
-		logs.Error(fmt.Sprintf("Could not unmarshal body of GET request for %s", ic.service), err)
+		logs.Error(fmt.Sprintf("Could not decode response from GET request to %s", ic.service), err)
 		return err
 	}
 	return nil
