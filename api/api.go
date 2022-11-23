@@ -11,11 +11,13 @@ import (
 )
 
 var serviceAccountTokens map[string]string
+var tokenFiles []string
 
-func UseServiceAccount(refreshRate time.Duration, tokenFiles ...string) func() {
+func UseServiceAccount(refreshRate time.Duration, files ...string) func() {
+	tokenFiles = files
 	serviceAccountTokens = make(map[string]string)
 
-	readTokens(tokenFiles...)
+	readTokens()
 
 	ticker := time.NewTicker(refreshRate)
 	done := make(chan bool)
@@ -25,7 +27,7 @@ func UseServiceAccount(refreshRate time.Duration, tokenFiles ...string) func() {
 			case <-done:
 				return
 			case <-ticker.C:
-				readTokens(tokenFiles...)
+				readTokens()
 			}
 		}
 	}()
@@ -35,7 +37,7 @@ func UseServiceAccount(refreshRate time.Duration, tokenFiles ...string) func() {
 	}
 }
 
-func readTokens(tokenFiles ...string) {
+func readTokens() {
 	for _, tokenFile := range tokenFiles {
 		b, err := ioutil.ReadFile(tokenFile)
 		if err != nil {
@@ -62,8 +64,23 @@ func (ic *internalClient) Do(r *http.Request) (*http.Response, error) {
 	if !ok {
 		logs.Fatal("Could not make internal HTTP request to service "+ic.service, fmt.Errorf("Token not in memory"))
 	}
-	r.Header.Add("X-Client-Id", token)
-	return ic.Client.Do(r)
+
+	var firstTry http.Request = *r
+	var secondTry http.Request = *r
+
+	firstTry.Header.Add("X-Client-Id", token)
+	res, err := ic.Client.Do(&firstTry)
+	if err != nil {
+		return res, err
+	}
+
+	if res.StatusCode == http.StatusForbidden {
+		// trigger a new refresh
+		readTokens()
+		secondTry.Header.Add("X-Client-Id", token)
+		res, err = ic.Client.Do(&secondTry)
+	}
+	return res, err
 }
 
 func NewInternalClient(service string) Client {
