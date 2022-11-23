@@ -1,4 +1,4 @@
-package main
+package kube
 
 import (
 	"github.com/aSquidsBody/go-common/logs"
