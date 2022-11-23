@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/aSquidsBody/go-common/api"
 	"github.com/aSquidsBody/go-common/env"
@@ -23,6 +24,27 @@ func WithVars(next func(http.ResponseWriter, *http.Request), urlVars ...string) 
 				return
 			}
 			ctx = context.WithValue(ctx, urlVar, v)
+		}
+		next(w, r.WithContext(ctx))
+	}
+}
+
+func WithIntVars(next func(http.ResponseWriter, *http.Request), names ...string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ctx := r.Context()
+		for _, name := range names {
+			v, ok := vars[name]
+			if !ok {
+				err := fmt.Errorf("Malformed URL. Missing %s", name)
+				api.WriteBadRequestError(w, err)
+				return
+			}
+			intV, err := strconv.Atoi(v)
+			if err != nil {
+				api.WriteBadRequestError(w, fmt.Errorf("Malformed URL. Invalid value for %s: value = %s", name, v))
+			}
+			ctx = context.WithValue(ctx, name, intV)
 		}
 		next(w, r.WithContext(ctx))
 	}
