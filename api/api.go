@@ -1,10 +1,12 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/aSquidsBody/go-common/logs"
@@ -52,11 +54,13 @@ func readTokens() {
 
 type Client interface {
 	Do(*http.Request) (*http.Response, error)
+	Get(string, interface{}) error
 }
 
 type internalClient struct {
 	*http.Client
 	service string
+	url     string
 }
 
 func (ic *internalClient) Do(r *http.Request) (*http.Response, error) {
@@ -83,9 +87,43 @@ func (ic *internalClient) Do(r *http.Request) (*http.Response, error) {
 	return res, err
 }
 
-func NewInternalClient(service string) Client {
+func (ic *internalClient) Get(route string, v interface{}) error {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", ic.url, route), nil)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Could not create GET request for %s", ic.service), err)
+		return err
+	}
+
+	res, err := ic.Do(req)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Could not make GET request for %s", ic.service), err)
+		return err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Could not read body of GET request for %s", ic.service), err)
+		return err
+	}
+
+	err = json.Unmarshal(body, v)
+	if err != nil {
+		logs.Error(fmt.Sprintf("Could not unmarshal body of GET request for %s", ic.service), err)
+		return err
+	}
+	return nil
+}
+
+func NewInternalClient(host, port string) Client {
+	strs := strings.Split(host, ".")
+	if len(strs) <= 1 {
+		logs.Fatal("Could not determine service name for internal client", fmt.Errorf("Unable to split host %s", host))
+	}
+
 	return &internalClient{
 		Client:  &http.Client{},
-		service: service,
+		service: strs[0],
+		url:     fmt.Sprintf("http://%s:%s", host, port),
 	}
 }
