@@ -1,5 +1,10 @@
 package api
 
+import (
+	"fmt"
+	"net/http"
+)
+
 // WriteNotFoundError writes a 404 response. No other information
 // is passed to the client.
 func WriteNotFoundError(w writer) {
@@ -12,4 +17,8 @@ func WriteNotFoundError(w writer) {
 // request parameters
 func WriteBadRequestError(w writer, errs ...error) {
 	writeError(w, 400, "Bad Request", errs...)
+}
+
+func WriteForbidden(w writer, msg string) {
+	writeError(w, http.StatusForbidden, "Forbidden", fmt.Errorf(msg))
 }

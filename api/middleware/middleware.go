@@ -8,8 +8,13 @@ import (
 
 	"github.com/aSquidsBody/go-common/api"
 	"github.com/aSquidsBody/go-common/env"
+	"github.com/aSquidsBody/go-common/logs"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	authv1 "k8s.io/api/authentication/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"k8s.io/client-go/kubernetes"
 )
 
 func WithVars(next func(http.ResponseWriter, *http.Request), urlVars ...string) func(http.ResponseWriter, *http.Request) {
@@ -57,4 +62,43 @@ func WithCors(r *mux.Router) http.Handler {
 	originsOk := handlers.AllowedOrigins([]string{env.GetEnv("ORIGIN_ALLOWED", "*")})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	return handlers.CORS(headersOk, originsOk, methodsOk)(r)
+}
+
+// Read ServiceAccount token
+func InternalEndpoint(next func(http.ResponseWriter, *http.Request), clientSet *kubernetes.Clientset) func(http.ResponseWriter, *http.Request) {
+	serviceName := env.GetEnv("SERVICE_NAME", "")
+	if serviceName == "" {
+		logs.Fatal("SERVICE_NAME is undefined", fmt.Errorf("Env var not defined."))
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		clientId := r.Header.Get("X-Client-Id")
+		ctx := r.Context()
+
+		// if no clientId, then assume is external request. The
+		if len(clientId) == 0 {
+			ctx = context.WithValue(ctx, "internal", false)
+			next(w, r.WithContext(ctx))
+			return
+		}
+
+		tr := authv1.TokenReview{
+			Spec: authv1.TokenReviewSpec{
+				Token:     clientId,
+				Audiences: []string{serviceName},
+			},
+		}
+		result, err := clientSet.AuthenticationV1().TokenReviews().Create(context.TODO(), &tr, metav1.CreateOptions{})
+		if err != nil {
+			logs.Error("Could not authenticate ServiceAccountToken", err)
+			api.WriteServerError(w, fmt.Errorf("Could not authenticate ServiceAccountToken. Error = %s", err.Error()))
+			return
+		}
+		if result.Status.Authenticated {
+			ctx = context.WithValue(ctx, "internal", true)
+			next(w, r.WithContext(ctx))
+			return
+		}
+		api.WriteForbidden(w, "Invalid token")
+	}
 }
