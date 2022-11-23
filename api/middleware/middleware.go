@@ -65,7 +65,7 @@ func WithCors(r *mux.Router) http.Handler {
 }
 
 // Read ServiceAccount token
-func InternalEndpoint(next func(http.ResponseWriter, *http.Request), clientSet *kubernetes.Clientset) func(http.ResponseWriter, *http.Request) {
+func Internal(next func(http.ResponseWriter, *http.Request), clientSet *kubernetes.Clientset) func(http.ResponseWriter, *http.Request) {
 	serviceName := env.GetEnv("SERVICE_NAME", "")
 	if serviceName == "" {
 		logs.Fatal("SERVICE_NAME is undefined", fmt.Errorf("Env var not defined."))
