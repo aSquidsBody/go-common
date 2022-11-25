@@ -63,29 +63,29 @@ type internalClient struct {
 	url     string
 }
 
-func (ic *internalClient) Do(r *http.Request) (*http.Response, error) {
-	token, ok := serviceAccountTokens[ic.service]
-	if !ok {
-		logs.Fatal("Could not make internal HTTP request to service "+ic.service, fmt.Errorf("Token not in memory"))
-	}
+// func (ic *internalClient) Do(r *http.Request) (*http.Response, error) {
+// 	token, ok := serviceAccountTokens[ic.service]
+// 	if !ok {
+// 		logs.Fatal("Could not make internal HTTP request to service "+ic.service, fmt.Errorf("Token not in memory"))
+// 	}
 
-	var firstTry http.Request = *r
-	var secondTry http.Request = *r
+// 	var firstTry http.Request = *r
+// 	var secondTry http.Request = *r
 
-	firstTry.Header.Add("X-Client-Id", token)
-	res, err := ic.Client.Do(&firstTry)
-	if err != nil {
-		return res, err
-	}
+// 	firstTry.Header.Add("X-Client-Id", token)
+// 	res, err := ic.Client.Do(&firstTry)
+// 	if err != nil {
+// 		return res, err
+// 	}
 
-	if res.StatusCode == http.StatusForbidden {
-		// trigger a new refresh
-		readTokens()
-		secondTry.Header.Add("X-Client-Id", token)
-		res, err = ic.Client.Do(&secondTry)
-	}
-	return res, err
-}
+// 	if res.StatusCode == http.StatusForbidden {
+// 		// trigger a new refresh
+// 		readTokens()
+// 		secondTry.Header.Add("X-Client-Id", token)
+// 		res, err = ic.Client.Do(&secondTry)
+// 	}
+// 	return res, err
+// }
 
 func (ic *internalClient) Get(route string, v interface{}) error {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", ic.url, route), nil)
