@@ -7,6 +7,6 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-func verbose() {
+func Verbose() {
 	sarama.Logger = log.New(os.Stdout, "[Sarama] ", log.LstdFlags)
 }
