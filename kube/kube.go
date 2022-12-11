@@ -9,7 +9,7 @@ import (
 func Config() *rest.Config {
 	c, err := rest.InClusterConfig()
 	if err != nil {
-		logs.Fatal("Could not create InClusterConfig", err)
+		logs.Fatal(err, "Could not create InClusterConfig")
 	}
 
 	return c
@@ -19,7 +19,7 @@ func NewClientset() *kubernetes.Clientset {
 	c := Config()
 	clientSet, err := kubernetes.NewForConfig(c)
 	if err != nil {
-		logs.Fatal("Could not create Clientset", err)
+		logs.Fatal(err, "Could not create Clientset")
 	}
 	return clientSet
 }
