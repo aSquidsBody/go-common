@@ -68,7 +68,7 @@ func WithCors(r *mux.Router) http.Handler {
 func Internal(next func(http.ResponseWriter, *http.Request), clientSet *kubernetes.Clientset) func(http.ResponseWriter, *http.Request) {
 	serviceName := env.GetEnv("SERVICE_NAME", "")
 	if serviceName == "" {
-		logs.Fatal("SERVICE_NAME is undefined", fmt.Errorf("Env var not defined."))
+		logs.Fatal(fmt.Errorf("Env var not defined."), "SERVICE_NAME is undefined")
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +90,7 @@ func Internal(next func(http.ResponseWriter, *http.Request), clientSet *kubernet
 		}
 		result, err := clientSet.AuthenticationV1().TokenReviews().Create(context.TODO(), &tr, metav1.CreateOptions{})
 		if err != nil {
-			logs.Error("Could not authenticate ServiceAccountToken", err)
+			logs.Error(err, "Could not authenticate ServiceAccountToken")
 			api.WriteServerError(w, fmt.Errorf("Could not authenticate ServiceAccountToken. Error = %s", err.Error()))
 			return
 		}

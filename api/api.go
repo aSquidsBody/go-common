@@ -90,13 +90,13 @@ type internalClient struct {
 func (ic *internalClient) Get(route string, v interface{}) error {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", ic.url, route), nil)
 	if err != nil {
-		logs.Error(fmt.Sprintf("Could not create GET request for %s", ic.service), err)
+		logs.Errorf(err, "Could not create GET request for %s", ic.service)
 		return err
 	}
 
 	res, err := ic.Do(req)
 	if err != nil {
-		logs.Error(fmt.Sprintf("Could not make GET request for %s", ic.service), err)
+		logs.Errorf(err, "Could not make GET request for %s", ic.service)
 		return err
 	}
 
@@ -104,16 +104,16 @@ func (ic *internalClient) Get(route string, v interface{}) error {
 		var resp ErrorResponse
 		err = json.NewDecoder(res.Body).Decode(&resp)
 		if err != nil {
-			logs.Error(fmt.Sprintf("GET request to %s failed with a %d response. Could not decode response body", ic.service, res.StatusCode), err)
+			logs.Errorf(err, "GET request to %s failed with a %d response. Could not decode response body", ic.service, res.StatusCode)
 			return err
 		}
-		logs.Error(fmt.Sprintf("GET request to %s failed with a %d response. Reason = %+v", ic.service, res.StatusCode, resp), fmt.Errorf("No error"))
+		logs.Errorf(fmt.Errorf("No error"), "GET request to %s failed with a %d response. Reason = %+v", ic.service, res.StatusCode, resp)
 		return fmt.Errorf("Failed GET request. Response code %d. Response %+v", res.StatusCode, resp)
 	}
 
 	err = json.NewDecoder(res.Body).Decode(v)
 	if err != nil {
-		logs.Error(fmt.Sprintf("Could not decode response from GET request to %s", ic.service), err)
+		logs.Errorf(err, "Could not decode response from GET request to %s", ic.service)
 		return err
 	}
 	return nil
@@ -122,7 +122,7 @@ func (ic *internalClient) Get(route string, v interface{}) error {
 func NewInternalClient(host, port string) Client {
 	strs := strings.Split(host, ".")
 	if len(strs) <= 1 {
-		logs.Fatal("Could not determine service name for internal client", fmt.Errorf("Unable to split host %s", host))
+		logs.Fatal(fmt.Errorf("Unable to split host %s", host), "Could not determine service name for internal client")
 	}
 
 	return &internalClient{

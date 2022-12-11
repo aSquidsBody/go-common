@@ -74,7 +74,7 @@ type ServerProperties struct {
 func castBool(key string, value interface{}) (bool, error) {
 	if v, ok := value.(bool); !ok {
 		err := fmt.Errorf("Invalid value: %s", value)
-		logs.Error(fmt.Sprintf("Failed to set %s in server.properties", key), err)
+		logs.Errorf(err, "Failed to set %s in server.properties", key)
 		return false, err
 	} else {
 		return v, nil
@@ -84,7 +84,7 @@ func castBool(key string, value interface{}) (bool, error) {
 func castString(key string, value interface{}) (string, error) {
 	if v, ok := value.(string); !ok {
 		err := fmt.Errorf("Invalid value: %s", value)
-		logs.Error(fmt.Sprintf("Failed to set %s in server.properties", key), err)
+		logs.Errorf(err, "Failed to set %s in server.properties", key)
 		return "", err
 	} else {
 		return v, nil
@@ -94,7 +94,7 @@ func castString(key string, value interface{}) (string, error) {
 func castInt(key string, value interface{}) (int, error) {
 	if v, ok := value.(int); !ok {
 		err := fmt.Errorf("Invalid value: %s", value)
-		logs.Error(fmt.Sprintf("Failed to set %s in server.properties", key), err)
+		logs.Errorf(err, "Failed to set %s in server.properties", key)
 		return 0, err
 	} else {
 		return v, nil
@@ -466,7 +466,7 @@ func (s *ServerProperties) Set(key string, value interface{}) error {
 		s.MaxWorldSize = v
 	default:
 		err := fmt.Errorf("Invalid key: %s", key)
-		logs.Error("Could not set server property", err)
+		logs.Error(err, "Could not set server property")
 		return err
 	}
 	return nil
