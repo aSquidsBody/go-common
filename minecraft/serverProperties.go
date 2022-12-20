@@ -475,7 +475,7 @@ func (s *ServerProperties) Set(key string, value interface{}) error {
 func (s ServerProperties) ToYaml() (string, error) {
 	b, err := yaml.Marshal(s)
 	if err != nil {
-		fmt.Println("Failed to send server.properties toString()")
+		fmt.Println("Failed to send server.properties toYaml()")
 		return "", err
 	}
 	str := strings.ReplaceAll(string(b), ": ", "=")
@@ -486,7 +486,7 @@ func (s ServerProperties) ToYaml() (string, error) {
 }
 
 // Creates a new ServerProperties object and populates it with the default values
-func NewServerProperties() ServerProperties {
+func BoilerplateServerProperties() ServerProperties {
 	return ServerProperties{
 		EnableJmxMonitoring:            false,
 		LevelSeed:                      "",
