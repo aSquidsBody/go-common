@@ -9,8 +9,8 @@ import (
 )
 
 type RedisClient interface {
-	Set(uint, interface{}) error
-	Get(uint, interface{}) error
+	Set(string, interface{}) error
+	Get(string, interface{}) error
 }
 
 type redisClient struct {
@@ -34,34 +34,34 @@ func NewRedisClient(host, port, password string) (rc RedisClient, err error) {
 	return
 }
 
-func (rc *redisClient) Set(ID uint, value interface{}) error {
+func (rc *redisClient) Set(ID string, value interface{}) error {
 	bytes, err := json.Marshal(value)
 	if err != nil {
 		fmt.Println("Error marshalling value for redis ", err)
 		return err
 	}
-	err = rc.client.Set(context.Background(), fmt.Sprint(ID), bytes, 0).Err()
+	err = rc.client.Set(context.Background(), ID, bytes, 0).Err()
 	if err != nil {
-		fmt.Printf("Error saving in redis. ID = %d, value = %+v\n", ID, value)
+		fmt.Printf("Error saving in redis. ID = %s, value = %+v\n", ID, value)
 		return err
 	}
 	return nil
 }
 
-func (rc *redisClient) Get(ID uint, v interface{}) error {
-	bytes, err := rc.client.Get(context.Background(), fmt.Sprint(ID)).Bytes()
+func (rc *redisClient) Get(ID string, v interface{}) error {
+	bytes, err := rc.client.Get(context.Background(), ID).Bytes()
 	if err == redis.Nil {
-		fmt.Println(fmt.Errorf("ID not found in redis. ID = %d", ID))
-		return fmt.Errorf("ID = %d does not exist in redis", ID)
+		fmt.Println(fmt.Errorf("ID not found in redis. ID = %s", ID))
+		return fmt.Errorf("ID = %s does not exist in redis", ID)
 	}
 	if err != nil {
-		fmt.Printf("Encountered error reading from redis. ID = %d, error = %e\n", ID, err)
+		fmt.Printf("Encountered error reading from redis. ID = %s, error = %e\n", ID, err)
 		return err
 	}
 
 	err = json.Unmarshal(bytes, v)
 	if err != nil {
-		fmt.Printf("Error unmarshalling object in redis. ID = %d, err = %e\n", ID, err)
+		fmt.Printf("Error unmarshalling object in redis. ID = %s, err = %e\n", ID, err)
 		return err
 	}
 	return nil
