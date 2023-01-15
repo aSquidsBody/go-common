@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/aSquidsBody/go-common/logs"
 	"github.com/go-redis/redis/v9"
 )
 
 type RedisClient interface {
 	Set(string, interface{}) error
 	Get(string, interface{}) error
+	Delete(string) error
 }
 
 type redisClient struct {
@@ -64,5 +66,15 @@ func (rc *redisClient) Get(ID string, v interface{}) error {
 		fmt.Printf("Error unmarshalling object in redis. ID = %s, err = %e\n", ID, err)
 		return err
 	}
+	return nil
+}
+
+func (rc *redisClient) Delete(ID string) error {
+	_, err := rc.client.Del(context.Background(), ID).Result()
+	if err != nil {
+		logs.Errorf(err, "Could not delete %s in redis", ID)
+		return err
+	}
+
 	return nil
 }
