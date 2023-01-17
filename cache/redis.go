@@ -19,6 +19,8 @@ type redisClient struct {
 	client *redis.Client
 }
 
+const Nil = redis.Nil
+
 func NewRedisClient(host, port, password string) (rc RedisClient, err error) {
 	connStr := fmt.Sprintf("%s:%s", host, port)
 	defer func() {
@@ -54,7 +56,7 @@ func (rc *redisClient) Get(ID string, v interface{}) error {
 	bytes, err := rc.client.Get(context.Background(), ID).Bytes()
 	if err == redis.Nil {
 		fmt.Println(fmt.Errorf("ID not found in redis. ID = %s", ID))
-		return redis.Nil
+		return Nil
 	}
 	if err != nil {
 		fmt.Printf("Encountered error reading from redis. ID = %s, error = %e\n", ID, err)
