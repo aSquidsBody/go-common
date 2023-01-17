@@ -54,7 +54,7 @@ func (rc *redisClient) Get(ID string, v interface{}) error {
 	bytes, err := rc.client.Get(context.Background(), ID).Bytes()
 	if err == redis.Nil {
 		fmt.Println(fmt.Errorf("ID not found in redis. ID = %s", ID))
-		return fmt.Errorf("ID = %s does not exist in redis", ID)
+		return redis.Nil
 	}
 	if err != nil {
 		fmt.Printf("Encountered error reading from redis. ID = %s, error = %e\n", ID, err)
