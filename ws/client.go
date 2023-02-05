@@ -18,6 +18,8 @@ type WsClient struct {
 
 	// Buffered channel to receive messages from the end user
 	receive chan *WsMessage
+
+	done chan bool
 }
 
 // Write a message to the end-user
@@ -30,9 +32,13 @@ func (wc *WsClient) Messages() <-chan *WsMessage {
 	return wc.receive
 }
 
+func (wc *WsClient) Done() <-chan bool {
+	return wc.done
+}
+
 func NewWsClient(conn *websocket.Conn) *WsClient {
 	wc := &WsClient{
-		conn, make(chan *WsMessage, 256), make(chan *WsMessage, 256),
+		conn, make(chan *WsMessage, 256), make(chan *WsMessage, 256), make(chan bool, 1),
 	}
 	return wc
 }
@@ -47,12 +53,17 @@ func (wc *WsClient) Enable() {
 func (wc *WsClient) Close() {
 	// close the conn
 	wc.conn.Close()
+
+	wc.done <- true
 }
 
 // Read pong message from the end user
 // Read any other data from the end user
 func readloop(wc *WsClient) {
-	defer wc.Close()
+	defer func() {
+		wc.Close()
+		close(wc.receive)
+	}()
 
 	wc.conn.SetReadLimit(maxMessageSize)
 	wc.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -68,11 +79,6 @@ func readloop(wc *WsClient) {
 			}
 			break
 		}
-		if messageType == PongMessage {
-			logs.Info("Client pong")
-			continue
-		}
-
 		if messageType == TextMessage {
 			message = bytes.TrimSpace(bytes.Replace(message, []byte{'\n'}, []byte{' '}, -1))
 		}
@@ -95,6 +101,7 @@ func writeloop(wc *WsClient) {
 	defer func() {
 		pingTicker.Stop()
 		wc.Close()
+		close(wc.send)
 	}()
 
 	// infinite loop to write the messages to the end user
