@@ -32,7 +32,7 @@ func NewJsonMessage(content interface{}) (*WsMessage, error) {
 
 	return &WsMessage{
 		messageType: TextMessage,
-		Content:     data,
+		Content:     string(data),
 	}, nil
 }
 
